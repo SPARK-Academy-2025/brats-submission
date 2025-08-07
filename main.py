@@ -19,11 +19,10 @@ def main(input_dir: str, output_dir: str):
             't2f':f'{subject_path}-t2f.nii.gz',
         }
         img_paths = {contrast: os.path.join(input_dir, pth) for contrast, pth in img_paths.items()}
-        predicted_seg = infer_one_subject(img_paths=img_paths)
-        
-        
-        # Save prediction
+        # take sample
         _, affine, header = load_nii(img_paths['t1n'])
+        predicted_seg = infer_one_subject(img_paths=img_paths)
+ 
         save_path = os.path.join(output_dir, f'{subject_path}.nii.gz')
         save_nii(predicted_seg, save_path, affine, header)
         print(f"Saved prediction to {save_path}")
@@ -33,10 +32,13 @@ def main(input_dir: str, output_dir: str):
 def infer_one_subject(img_paths: dict):
     print(f'Running inference using: {img_paths}')
     ## Load images
-    # images = {contrast:load_nii(pth)[0] for contrast, pth in img_paths.items()}
+    images = {contrast:load_nii(pth)[0] for contrast, pth in img_paths.items()}
+    # preprocessing
+
+    prediction = segment_image(image)
 
     ## Preprocess, Model Inference, Postprocessing Code here...
-    return None
+    return prediction
 
 
 def parse_args():
