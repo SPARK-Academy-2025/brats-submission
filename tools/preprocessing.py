@@ -3,59 +3,71 @@ import nibabel as nib
 import numpy as np
 from skimage.exposure import match_histograms
 from tqdm import tqdm
+import torchio as tio
+import torch
 
 
 reference_path = "data/reference/00000039_brain_t1.nii"
-ref_data = nib.load(reference_path).get_fdata()
 
-modalities = {
-    "t1n": "-t1n.nii",
-    "t1c": "-t1c.nii",
-    "t2w": "-t2w.nii",
-    "t2f": "-t2f.nii",
-}
+# Load reference data with error handling
+if os.path.exists(reference_path):
+    ref_data = nib.load(reference_path).get_fdata()
+else:
+    ref_data = None
+    print(f"Warning: Reference file not found at {reference_path}")
+
+test_transforms = tio.Compose([
+    tio.ZNormalization(include=['image']),
+    tio.CropOrPad((96, 96, 96)),
+])
+
 
 # --- Histogram Matching Function ---
-def histogram_match(volume, reference):
-    return match_histograms(volume, reference, channel_axis=None)
+def histogram_match(volume):
+    if ref_data is not None:
+        return match_histograms(volume, reference=ref_data, channel_axis=None)
+    else:
+        return volume  # Return original if no reference available
 
 
 
-def getitem(image, ref_affine, tranform=None):
-    matched_array = histogram_match(image, ref_data)
-    # Load modalities
-    modality_map = {
+def preprocess_item(images, affine, transforms=test_transforms):
+    """
+    Modified getitem that accepts affine information.
+    """
+    # Apply histogram matching to each modality
+    matched_images = {}
+    for modality, img_data in images.items():
+        matched_images[modality] = histogram_match(img_data)
+    
+    # Stack modalities in standard order: [flair, t1, t1ce, t2]
+    modality_mapping = {
+        'flair': 't2f',
         't1': 't1n',
-        't1ce': 't1c',
-        't2': 't2w',
-        'flair': 't2f'
+        't1ce': 't1c', 
+        't2': 't2w'
     }
-
-
-    # Stack modalities: [flair, t1, t1ce, t2] - standard order
+    
     vol = np.stack([
-        modalities['flair'][0], 
-        modalities['t1'][0], 
-        modalities['t1ce'][0], 
-        modalities['t2'][0]
+        matched_images[modality_mapping['flair']],
+        matched_images[modality_mapping['t1']],
+        matched_images[modality_mapping['t1ce']],
+        matched_images[modality_mapping['t2']]
     ], axis=0)
+    
     vol_tensor = torch.from_numpy(vol.astype(np.float32))
-
-    # Create TorchIO subject with only image (no segmentation)
-    image = tio.ScalarImage(tensor=vol_tensor, affine=ref_affine)
+    
+    # Use the provided affine
+    image = tio.ScalarImage(tensor=vol_tensor, affine=affine)
     subject = tio.Subject(image=image)
-
-    # Apply basic preprocessing
+    
+    # Apply preprocessing
     subject = tio.Compose([
         tio.ToCanonical(),
         tio.Resample((1, 1, 1)),
     ])(subject)
-
+    
     if transforms:
         subject = transforms(subject)
-
-    # Return only image data and subject ID
-    return {
-        'image': subject['image'].data,
-        'subject_id': data_id
-        }
+    
+    return subject['image'].data

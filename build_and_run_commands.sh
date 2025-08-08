@@ -20,7 +20,7 @@
 
 # Replace the variables below with your own values before running the script. Variables that need to be changed have a (**). Keep this section uncommented.
 
-PROJECT_ID="synXXXXXXXX" #  (**) Change to your Project Synapse Project ID (same as the one in the val stage)
+PROJECT_ID="syn68835674" #  (**) Change to your Project Synapse Project ID (same as the one in the val stage)
 IMAGE_NAME="brats-ssa-spark" # (**) The name you would like to give your Docker image 
 TAG="latest"  # Tag for the Docker image (e.g., "latest", "v1", etc.)
 DOCKERFILE_DIR="." # Directory containing the Dockerfile
@@ -28,7 +28,7 @@ DOCKERFILE_DIR="." # Directory containing the Dockerfile
 INPUT_DIR="$(pwd)/data/example_input" # Absolute path to the input directory 
 OUTPUT_DIR="$(pwd)/data/example_output" # Absolute path to the output directory
 
-SYNAPSE_USERNAME="your_username" # (**) Replace with your Synapse username 
+SYNAPSE_USERNAME="anibrown-spark" # (**) Replace with your Synapse username 
 
 
 
