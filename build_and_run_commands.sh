@@ -21,12 +21,12 @@
 # Replace the variables below with your own values before running the script. Variables that need to be changed have a (**). Keep this section uncommented.
 
 PROJECT_ID="syn68835674" #  (**) Change to your Project Synapse Project ID (same as the one in the val stage)
-IMAGE_NAME="brats-ssa-spark" # (**) The name you would like to give your Docker image 
-TAG="latest"  # Tag for the Docker image (e.g., "latest", "v1", etc.)
+IMAGE_NAME="brats-ssa-spark-oyo" # (**) The name you would like to give your Docker image 
+TAG="latestV2"  # Tag for the Docker image (e.g., "latest", "v1", etc.)
 DOCKERFILE_DIR="." # Directory containing the Dockerfile
 
 INPUT_DIR="$(pwd)/data/example_input" # Absolute path to the input directory 
-OUTPUT_DIR="$(pwd)/data/example_output" # Absolute path to the output directory
+OUTPUT_DIR="$(pwd)/data/new_output" # Absolute path to the output directory
 
 SYNAPSE_USERNAME="anibrown-spark" # (**) Replace with your Synapse username 
 
@@ -38,7 +38,7 @@ SYNAPSE_USERNAME="anibrown-spark" # (**) Replace with your Synapse username
 # Instructions for creating a PAT can be found here:
 # https://python-docs.synapse.org/en/stable/tutorials/authentication/#:~:text=Create%20a-,Personal%20Access%20Token,-(aka%3A%20Synapse
 
-# docker login docker.synapse.org --username $SYNAPSE_USERNAME
+docker login docker.synapse.org --username $SYNAPSE_USERNAME
 
 
 
@@ -79,5 +79,5 @@ SYNAPSE_USERNAME="anibrown-spark" # (**) Replace with your Synapse username
 
 # Step 4) # Once the container has been successfully run, you can push the image to Synapse. This takes a while since it uploads the entire image to the registry.
 
-# echo "Pushing Docker image to Synapse..."
-# docker push docker.synapse.org/$PROJECT_ID/$IMAGE_NAME:$TAG
+echo "Pushing Docker image to Synapse..."
+docker push docker.synapse.org/$PROJECT_ID/$IMAGE_NAME:$TAG
